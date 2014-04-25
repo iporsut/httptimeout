@@ -1,4 +1,4 @@
-package main
+package httptimeout
 
 import (
     "errors"
@@ -6,11 +6,17 @@ import (
     "time"
 )
 
+type HttpGetter interface {
+    Get(string) (*http.Response, error)
+}
+
+var DefaultClient HttpGetter = &http.Client{}
+
 func GetTimeout(url string, timeout time.Duration) (*http.Response, error) {
     responseChannel := make(chan *http.Response, 1)
     errorChannel := make(chan error, 1)
     go func() {
-        resp, err := http.Get(url)
+        resp, err := DefaultClient.Get(url)
         if err != nil {
             errorChannel <- err
         } else {
